@@ -2,16 +2,16 @@
 
 A simple version of the OVH Api Console.
 
-Note: The environnement is based on the ngBoilerplate engine.
+Note: The environnement is based on the [ngBoilerplate](https://github.com/ngbp/ngbp) engine.
 
 ## Installation
 
 Before cloning the project, make sure to have: git, node.js, grunt-cli, and bower.
-For this 2 last elements, when you have node.js installed, simply run:
+For this 2 last elements, once you have node.js installed, simply run:
 `npm install -g bower` and ` npm install -g grunt-cli` 
 
 You can now install dependancies:
-```
+```shell
 npm install
 bower install
 ```
