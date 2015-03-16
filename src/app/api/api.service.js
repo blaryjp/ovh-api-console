@@ -1,7 +1,7 @@
 angular.module('consoleApp').service('Api', function ($q, Ovh) {
     'use strict';
 
-    this.getRoot = function () {
+    this.getRootApis = function () {
         return Ovh.getSchema('/?null');
     };
 
@@ -46,7 +46,7 @@ angular.module('consoleApp').service('Api', function ($q, Ovh) {
 
     }
 
-    this.getSubApi = function (path) {
+    this.getSubApis = function (path) {
         return Ovh.getSchema(path).then(function (subApi) {
 
             subApi.original = _.cloneDeep(subApi);
@@ -85,17 +85,14 @@ angular.module('consoleApp').service('Api', function ($q, Ovh) {
     };
 
 
-    // function parseRequestedApiParams (param)
-
     this.requestApi = function (api) {
 
         var config = {};
 
+        // parse params
         _.forEach(api.operation.parameters, function (param) {
 
-            //if (param.isModel && !param.isEnum) {
-
-                // if complex type, go into its properties, else simply takes param
+            // if complex type, go into its properties, else simply takes param
             _.forEach(( (param.isModel && !param.isEnum) ? param.modelProperties : [param]), function (_param) {
                 switch (_param.paramType) {
                 case 'path':
@@ -112,23 +109,6 @@ angular.module('consoleApp').service('Api', function ($q, Ovh) {
                     break;
                 }
             });
-
-            /*} else {
-                switch (param.paramType) {
-                case 'path':
-                    if (!config.params) {
-                        config.params = {};
-                    }
-                    config.params[param.name] = param.value;
-                    break;
-                case 'body':
-                    if (!config.data) {
-                        config.data = {};
-                    }
-                    config.data[param.name] = param.value;
-                    break;
-                }
-            }*/
         });
 
         var startTime = new Date().getTime();

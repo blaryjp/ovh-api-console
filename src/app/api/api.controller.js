@@ -1,10 +1,11 @@
 angular.module('consoleApp').controller('ApiCtrl', function ($scope, Api) {
     'use strict';
 
-    Api.getRoot().then(function (apisList) {
-        $scope.apiList = apisList;
-    });
-
+    function init () {
+        Api.getRootApis().then(function (apisList) {
+            $scope.apiList = apisList;
+        });
+    }
 
     $scope.toggleRootApi = function (api) {
         api.visible = !api.visible;
@@ -15,7 +16,7 @@ angular.module('consoleApp').controller('ApiCtrl', function ($scope, Api) {
             }
 
             api.loading = true;
-            Api.getSubApi(api.path).then(function (response) {
+            Api.getSubApis(api.path).then(function (response) {
                 api.subApis = response;
                 api.loading = false;
             });
@@ -24,28 +25,27 @@ angular.module('consoleApp').controller('ApiCtrl', function ($scope, Api) {
 
     $scope.requestApi = function (api) {
         api.result = {};    
+        api.loading = true;
         Api.requestApi(api).then(function (response) {
             api.result.success = true;
-            api.result.data = response.data;
-            api.result.status = response.status;
-            api.result.statusText = response.statusText;
-            api.result.request = response.config;
-            api.result.headers = JSON.parse(JSON.stringify(response.headers()));
-            api.result.showResult = true;
-            api.result.requestTime = response.requestTime;
-            console.log('resp:', response);
+            return response;
         }, function (response) {
-            console.log('err:', response);
             api.result.success = false;
-            api.result.data = response.data;
-            api.result.status = response.status;
-            api.result.statusText = response.statusText;
-            api.result.request = response.config;
-            api.result.headers = JSON.parse(JSON.stringify(response.headers()));
+            return response;
+        }).then(function (commonResponse) {
+            api.result.data = commonResponse.data;
+            api.result.status = commonResponse.status;
+            api.result.statusText = commonResponse.statusText;
+            api.result.request = commonResponse.config;
+            api.result.headers = JSON.parse(JSON.stringify(commonResponse.headers()));
             api.result.showResult = true;
-            api.result.requestTime = response.requestTime;
+            api.result.requestTime = commonResponse.requestTime;
+            api.loading = false;
         });
     };
+
+
+    init();
 
 });
 

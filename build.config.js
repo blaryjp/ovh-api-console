@@ -70,8 +70,7 @@ module.exports = {
       'vendor/angular-ui-router/release/angular-ui-router.js',
       'vendor/ng-ovh/ng-ovh.js',
       'vendor/scrollup/dist/jquery.scrollUp.min.js',
-      'vendor/jquery-jsonview/dist/jquery.jsonview.js',
-      'vendor/URIjs/src/URI.min.js'
+      'vendor/jquery-jsonview/dist/jquery.jsonview.js'
     ],
     css: [
       'vendor/jquery-jsonview/dist/jquery.jsonview.css'
