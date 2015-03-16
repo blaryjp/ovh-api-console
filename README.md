@@ -19,11 +19,8 @@ bower install
 And finally add your API AK, AS, and Base Path into `src/app/app.js`:
 ```
 OvhProvider.setAppKey('INSERT_AK_HERE');
-
 OvhProvider.setAppSecret('INSERT_AS_HERE');
-
 OvhProvider.setBaseUrl('INSERT_URL_HERE');
-
 ```
 
 ## Development
