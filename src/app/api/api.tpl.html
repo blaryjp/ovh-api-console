@@ -11,18 +11,22 @@
                     </a>
                     <span class="loading" data-ng-if="api.loading" style="margin: 9px;"></span> <!-- -------------------------------------------- -->
                     <div class="pull-right">
-                        <input type="text" class="form-control input-sm api-search-input" placeholder="Filter..." data-ng-model="api.filter" data-ng-init="api.filter = ''" />
-                        <button type="button" class="btn btn-link text-muted" data-ng-click="api.visible = true; api.viewRAW = !api.viewRAW">RAW</button>
+                        <input type="text" class="form-control input-sm api-search-input" placeholder="Filter..." 
+                            data-ng-model="api.filter" data-ng-init="api.filter = ''" data-ng-if="api.visible && !api.loading && !api.viewRAW" />
+                        <button type="button" class="btn btn-link api-view-raw" data-ng-click="toggleRootApiRAW(api)">RAW</button>
                     </div>
                 </div>
 
                 <!-- view RAW -->
                 <div class="panel-body" data-ng-if="api.visible && !api.loading && api.viewRAW">
-                    <div data-jsonview="api" class="well well-sm"></div>
+                    <div data-jsonview="api.original" class="well well-sm"></div>
                 </div>
 
                 <!-- body -->
                 <div class="panel-body" data-ng-show="api.visible && !api.loading && !api.viewRAW">
+
+                    <div class="alert alert-info" data-ng-if="api.filter && !(api.subApis.apis | filter:{'path': api.filter}).length">No results.</div>
+
                     <accordion close-others="false">
 
                         <accordion-group data-ng-repeat="subApi in api.subApis.apis | filter:{'path': api.filter}"
@@ -47,7 +51,7 @@
                             <!-- request form -->
                             <form class="bottom-space-m10" data-ng-submit="requestApi(subApi)">
 
-                                <h5 class="fs16 top-space-m26" data-ng-if="subApi.operation.parameters.length">Parameter(s)</h5>
+                                <h5 class="fs16 top-space-m26" data-ng-if="subApi.operation.parameters.length">Parameter(s):</h5>
 
                                 <table class="table table-striped table-condensed" data-ng-if="subApi.operation.parameters.length">
                                     <thead>
@@ -82,7 +86,7 @@
                                                                 <div data-ng-switch="modelParam.dataType">
 
                                                                     <div data-ng-switch-when="boolean">
-                                                                        <input type="checkbox" name="{{modelParam.name}}" id="{{modelParam.name}}" class="form-control" 
+                                                                        <input type="checkbox" name="{{modelParam.name}}" id="{{modelParam.name}}"
                                                                             data-ng-model="modelParam.value" data-ng-required="modelParam.required" />
                                                                     </div>
 
@@ -126,7 +130,7 @@
                                                 <div data-ng-switch="param.dataType">
 
                                                     <div data-ng-switch-when="boolean">
-                                                        <input type="checkbox" name="{{param.name}}" id="{{param.name}}" class="form-control" 
+                                                        <input type="checkbox" name="{{param.name}}" id="{{param.name}}"
                                                             data-ng-model="param.value" data-ng-required="param.required" />
                                                     </div>
 
@@ -165,7 +169,7 @@
 
 
                                 
-                                <button type="submit" class="btn btn-default" data-ng-disabled="">Execute</button>
+                                <button type="submit" class="btn btn-default" data-ng-disabled="subApi.loading">Execute</button>
                             </form>
 
 

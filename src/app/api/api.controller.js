@@ -9,6 +9,8 @@ angular.module('consoleApp').controller('ApiCtrl', function ($scope, Api) {
 
     $scope.toggleRootApi = function (api) {
         api.visible = !api.visible;
+        api.viewRAW = false;
+
         if (api.visible) {
 
             if (api.subApis) {
@@ -21,6 +23,11 @@ angular.module('consoleApp').controller('ApiCtrl', function ($scope, Api) {
                 api.loading = false;
             });
         }
+    };
+
+    $scope.toggleRootApiRAW = function (api) {
+        api.visible = true; 
+        api.viewRAW = !api.viewRAW;
     };
 
     $scope.requestApi = function (api) {

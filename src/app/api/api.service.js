@@ -2,7 +2,12 @@ angular.module('consoleApp').service('Api', function ($q, Ovh) {
     'use strict';
 
     this.getRootApis = function () {
-        return Ovh.getSchema('/?null');
+        return Ovh.getSchema('/?null').then(function (response) {
+            _.forEach(response.apis, function (api) {
+                api.original = _.cloneDeep(api);
+            });
+            return response;
+        });
     };
 
     function parseParameters (api, parameters) {
