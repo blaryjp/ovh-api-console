@@ -9,6 +9,11 @@ angular.module('consoleApp').controller('ApiCtrl', function ($scope, Api) {
     $scope.toggleRootApi = function (api) {
         api.visible = !api.visible;
         if (api.visible) {
+
+            if (api.subApis) {
+                return;
+            }
+
             api.loading = true;
             Api.getSubApi(api.path).then(function (response) {
                 api.subApis = response;
@@ -29,13 +34,16 @@ angular.module('consoleApp').controller('ApiCtrl', function ($scope, Api) {
             api.result.showResult = true;
             api.result.requestTime = response.requestTime;
             console.log('resp:', response);
-        }, function (err) {
-            console.log('err:', err);
+        }, function (response) {
+            console.log('err:', response);
             api.result.success = false;
-            api.result.data = err.data;
-            api.result.status = err.status;
-            api.result.statusText = err.statusText;
+            api.result.data = response.data;
+            api.result.status = response.status;
+            api.result.statusText = response.statusText;
+            api.result.request = response.config;
+            api.result.headers = JSON.parse(JSON.stringify(response.headers()));
             api.result.showResult = true;
+            api.result.requestTime = response.requestTime;
         });
     };
 

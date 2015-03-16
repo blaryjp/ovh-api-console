@@ -109,6 +109,47 @@ body {
 }
 
 
+.label.httpcode {
+    display: inline-block;
+    width: 60px;
+    padding: 3px 7px;
+    margin-right: 5px;
+    color: white;
+    font-weight: normal;
+    &.GET {
+        background-color: #3498db;
+    }
+    &.POST {
+        background-color: #27ae60;
+    }
+    &.PUT {
+        background-color: #f39c12;
+    }
+    &.DELETE {
+        background-color: #e74c3c;
+    }
+}
+
+.label {
+    &.label-BETA {
+        background-color: #777;   
+    }
+    &.label-DEPRECATED {
+        background-color: #777;   
+    }
+    &.label-ALPHA {
+        background-color: #2757A6;   
+    }
+}
+
+.jsonview {
+    font-size: .9em;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+
+
 /**
  * Now that all app-wide styles have been applied, we can load the styles for
  * all the submodules and components we are using. 

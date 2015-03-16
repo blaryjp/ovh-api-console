@@ -7,7 +7,7 @@
                 <!-- header -->
                 <div class="panel-heading clearfix">
                     <a href="" class="pull-left" data-ng-click="toggleRootApi(api)">
-                        <h2 class="open-sans-light no-space">{{:: api.path}}</h2>
+                        <h2 class="open-sans-light no-space">{{ api.path}}</h2>
                     </a>
                     <span class="loading" data-ng-if="api.loading" style="margin: 9px;"></span> <!-- -------------------------------------------- -->
                     <div class="pull-right">
@@ -22,33 +22,34 @@
                 </div>
 
                 <!-- body -->
-                <div class="panel-body" data-ng-if="api.visible && !api.loading && !api.viewRAW">
+                <div class="panel-body" data-ng-show="api.visible && !api.loading && !api.viewRAW">
                     <accordion close-others="false">
 
                         <accordion-group data-ng-repeat="subApi in api.subApis.apis | filter:{'path': api.filter}"
-                                         class="subapi-item">
+                                         class="subapi-item" data-is-open="subApi.isOpen">
                             <accordion-heading>
-                                <span class="label httpcode" data-ng-class="subApi.operation.httpMethod">{{:: subApi.operation.httpMethod }}</span>
+                                <span class="label httpcode" data-ng-class="subApi.operation.httpMethod">{{ subApi.operation.httpMethod }}</span>
                                 <span class="subapi-title-path open-sans fs16 middle" data-ng-bind-html="subApi.path | prettypath"></span>
                                 <span class="label normal left-space-m10" style="font-size: .6em;"
                                       data-ng-class="'label-' + subApi.operation.apiStatus.value"
                                       data-ng-if="subApi.operation.apiStatus.value !== 'PRODUCTION'">
-                                      {{:: subApi.operation.apiStatus.value }}
+                                      {{ subApi.operation.apiStatus.value }}
                                 </span>
                                 <i class="glyphicon glyphicon glyphicon-globe left-space-m10 middle text-muted" title="Public access (no authentication required)" data-ng-if="subApi.operation.noAuthentication"></i>  
                                 <span class="pull-right fs14 top-space-m2 text-muted hidden-xs">
-                                    {{:: subApi.description }}
+                                    {{ subApi.description }}
                                 </span>
                             </accordion-heading>
 
-                            <p class="italic">{{:: subApi.operation.description}}</p>
+
+                            <p class="italic">{{ subApi.operation.description}}</p>
 
                             <!-- request form -->
                             <form class="bottom-space-m10" data-ng-submit="requestApi(subApi)">
 
-                                <h5 class="fs16 top-space-m26">Parameter(s)</h5>
+                                <h5 class="fs16 top-space-m26" data-ng-if="subApi.operation.parameters.length">Parameter(s)</h5>
 
-                                <table class="table table-striped table-condensed">
+                                <table class="table table-striped table-condensed" data-ng-if="subApi.operation.parameters.length">
                                     <thead>
                                         <tr>
                                             <th>Parameter</th>
@@ -172,7 +173,7 @@
 
                                 <!-- Response Class tab -->
                                 <tab heading="Response Class">
-                                    <pre data-ng-if="!subApi.operation.responseTypeIsModel">{{:: subApi.operation.responseType}}</pre>
+                                    <pre data-ng-if="!subApi.operation.responseTypeIsModel">{{ subApi.operation.responseType}}</pre>
                                     <div class="space-p10" data-ng-if="subApi.operation.responseTypeIsModel" data-jsonview="api.subApis.models[subApi.operation.responseType]"></div>
                                 </tab>
 
