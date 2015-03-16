@@ -13,8 +13,17 @@ angular.module( 'consoleApp', [
 
 .config(function (OvhProvider) {
 
+    // Set the Application Key (AK):
+    OvhProvider.setAppKey('INSERT_AK_HERE');
 
-    // [... other options]
+    // Set the Application Secret (AS):
+    OvhProvider.setAppSecret('INSERT_AS_HERE');
+
+    // Set the API Base Path
+    OvhProvider.setBaseUrl('INSERT_URL_HERE');
+
+    // Returns complete data
+    OvhProvider.setPreventReturnData(true);
 
 })
 
