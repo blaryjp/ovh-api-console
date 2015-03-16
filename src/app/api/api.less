@@ -1,0 +1,149 @@
+
+
+.label.httpcode {
+    display: inline-block;
+    width: 60px;
+    padding: 3px 7px;
+    margin-right: 5px;
+    color: white;
+    font-weight: normal;
+    &.GET {
+        background-color: #3498db;
+    }
+    &.POST {
+        background-color: #27ae60;
+    }
+    &.PUT {
+        background-color: #f39c12;
+    }
+    &.DELETE {
+        background-color: #e74c3c;
+    }
+}
+
+.label {
+    &.label-BETA {
+        background-color: #777;   
+    }
+    &.label-DEPRECATED {
+        background-color: #777;   
+    }
+}
+
+.jsonview {
+    font-size: .9em;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+#root-list {
+    margin-bottom: 100px;
+
+    > li {
+        margin-bottom: 15px;
+        // .panel-heading {
+
+        //  h2 {
+        //      margin: 0;
+        //      .open-sans;
+        //      font-weight: 300;
+        //  }
+        // }
+        > .panel-heading {
+            padding: 5px 15px;
+            a {
+                color: #333;
+            }
+        }
+        > .panel-body {
+            padding: 5px 15px;
+
+            .panel-group {
+                margin-bottom: 10px;  // override bootstrap
+            }
+        }
+
+        .api-search-input {
+            width: 170px;
+            display: inline-block;
+            opacity: .6;
+            &:hover, &:focus, &:active {
+                opacity: 1;
+            }
+            ~ button {
+                color: #bbb;
+                &:hover, &:focus, &:active {
+                    color: #333;
+                }
+            }
+        }
+        .subapi-item {
+            > .panel-heading {
+                padding: 0;
+                a {
+                    display: block;
+                    padding: 10px 15px;
+                    .clearfix;
+
+                    &:hover, &:focus {
+                        text-decoration: none;
+                        span.subapi-title-path {
+                            text-decoration: underline;
+                        }
+                    }
+                }
+            }
+
+            .panel-body {
+                // .nav-tabs > li.active > a, 
+                // .nav-tabs > li.active > a:hover, 
+                // .nav-tabs > li.active > a:focus {
+                //     background-color: #f5f5f5;  // override bootstrap
+                // }
+                .tab-pane {
+                    border-left: 1px solid #ddd;
+                    border-bottom: 1px solid #ddd;
+                    border-right: 1px solid #ddd;
+                    background: #f5f5f5;
+
+                    pre {
+                        background-color: transparent;
+                        border: 0;
+                        margin: 0;
+                    }
+
+                    .raw-infos {
+
+                        table {
+                            thead {
+                                tr {
+                                    background-color: #eee;
+                                    text-transform: uppercase;
+
+                                    th:first-child {
+                                        border-right: 2px solid #ddd;
+                                    }
+                                }
+                            }
+
+                            td {
+                                font-family: 'Lucida Console', 'Bitstream VeraSans Mono', 'DejaVu Sans Mono', monospace;
+                                font-size: 12px;
+
+                                &:first-child {
+                                    border-right: 2px solid #ddd;
+                                }
+                            }
+                        }
+                    }
+
+                    .label-requestTime {
+                        position: absolute;
+                        right: 10px;
+                        top: 10px;
+                    }
+                }
+            }
+        }
+    }
+}

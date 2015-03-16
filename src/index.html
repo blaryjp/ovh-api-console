@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html ng-app="consoleApp" ng-controller="AppCtrl">
+  <head>
+    <title ng-bind="pageTitle"></title>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- font awesome from BootstrapCDN -->
+    <!-- <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet"> -->
+
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300,400' rel='stylesheet' type='text/css'>
+
+    <!-- compiled CSS --><% styles.forEach( function ( file ) { %>
+    <link rel="stylesheet" type="text/css" href="<%= file %>" /><% }); %>
+
+    <!-- compiled JavaScript --><% scripts.forEach( function ( file ) { %>
+    <script type="text/javascript" src="<%= file %>"></script><% }); %>
+
+  </head>
+  <body>
+  
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#">My Little API</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse" data-ng-controller="SessionCtrl">
+          <form class="navbar-form navbar-right" data-ng-if="isLogged" data-ng-submit="logout()">
+            <div class="inline middle right-space-m15" data-ng-if="me" style="color: white">
+              <div class="text-right fs12 open-sans">{{me.nichandle}}</div>
+              <div class="text-right fs12 open-sans-light">{{me.email}}</div>
+            </div>
+            <button type="submit" class="btn btn-default middle" title="Log out" data-ng-disabled="loading">
+              <span class="glyphicon glyphicon-log-out" data-ng-if="!loading"></span>
+              <span class="loading" data-ng-if="loading"></span>
+            </button>
+          </form>
+          <form class="navbar-form navbar-right" data-ng-if="!isLogged" data-ng-submit="login()">
+            <button type="submit" class="btn btn-default" data-ng-disabled="loading">
+              <span data-ng-if="!loading">Log in</span>
+              <span class="loading" data-ng-if="loading"></span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container" data-ui-view="main"></div>
+
+  </body>
+</html>
