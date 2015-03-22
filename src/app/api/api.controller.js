@@ -39,14 +39,14 @@ angular.module('consoleApp').controller('ApiCtrl', function ($scope, Api) {
         }, function (response) {
             api.result.success = false;
             return response;
-        }).then(function (commonResponse) {
-            api.result.data = commonResponse.data;
-            api.result.status = commonResponse.status;
-            api.result.statusText = commonResponse.statusText;
-            api.result.request = commonResponse.config;
-            api.result.headers = JSON.parse(JSON.stringify(commonResponse.headers()));
+        }).then(function (response) {
+            api.result.data = response.data;
+            api.result.status = response.status;
+            api.result.statusText = response.statusText;
+            api.result.request = response.config;
+            api.result.headers = JSON.parse(JSON.stringify(response.headers()));
             api.result.showResult = true;
-            api.result.requestTime = commonResponse.requestTime;
+            api.result.requestTime = response.requestTime;
             api.loading = false;
         });
     };

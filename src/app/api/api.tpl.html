@@ -9,7 +9,7 @@
                     <a href="" class="pull-left" data-ng-click="toggleRootApi(api)">
                         <h2 class="open-sans-light no-space">{{ api.path}}</h2>
                     </a>
-                    <span class="loading" data-ng-if="api.loading" style="margin: 9px;"></span> <!-- -------------------------------------------- -->
+                    <span class="loading top-space-m10 left-space-m20" data-ng-if="api.loading"></span>
                     <div class="pull-right">
                         <input type="text" class="form-control input-sm api-search-input" placeholder="Filter..." 
                             data-ng-model="api.filter" data-ng-init="api.filter = ''" data-ng-if="api.visible && !api.loading && !api.viewRAW" />
@@ -27,223 +27,226 @@
 
                     <div class="alert alert-info" data-ng-if="api.filter && !(api.subApis.apis | filter:{'path': api.filter}).length">No results.</div>
 
-                    <accordion close-others="false">
+                    <div class="panel-group" role="tablist">
+                        <div class="panel panel-default subapi-item" data-ng-repeat="subApi in api.subApis.apis | filter:{'path': api.filter}">
+                            <div class="panel-heading" role="tab">
+                                <h4 class="panel-title">
+                                    <a href="" data-ng-click="subApi.isOpen = !subApi.isOpen">
+                                        <span class="label httpcode" data-ng-class="subApi.operation.httpMethod">{{ subApi.operation.httpMethod }}</span>
+                                        <span class="subapi-title-path open-sans fs16 middle" data-ng-bind-html="subApi.path | prettypath"></span>
+                                        <span class="label normal left-space-m10" style="font-size: .6em;"
+                                        data-ng-class="'label-' + subApi.operation.apiStatus.value"
+                                        data-ng-if="subApi.operation.apiStatus.value !== 'PRODUCTION'">
+                                        {{ subApi.operation.apiStatus.value }}
+                                    </span>
+                                    <i class="glyphicon glyphicon glyphicon-globe left-space-m10 middle text-muted" title="Public access (no authentication required)" data-ng-if="subApi.operation.noAuthentication"></i>  
+                                    <span class="pull-right fs14 top-space-m2 text-muted hidden-xs">
+                                        {{ subApi.description }}
+                                    </span>
+                                </a>
+                            </h4>
+                        </div>
+                        <div class="panel-collapse collapse in" data-ng-if="subApi.isOpen">
+                            <div class="panel-body">
 
-                        <accordion-group data-ng-repeat="subApi in api.subApis.apis | filter:{'path': api.filter}"
-                                         class="subapi-item" data-is-open="subApi.isOpen">
-                            <accordion-heading>
-                                <span class="label httpcode" data-ng-class="subApi.operation.httpMethod">{{ subApi.operation.httpMethod }}</span>
-                                <span class="subapi-title-path open-sans fs16 middle" data-ng-bind-html="subApi.path | prettypath"></span>
-                                <span class="label normal left-space-m10" style="font-size: .6em;"
-                                      data-ng-class="'label-' + subApi.operation.apiStatus.value"
-                                      data-ng-if="subApi.operation.apiStatus.value !== 'PRODUCTION'">
-                                      {{ subApi.operation.apiStatus.value }}
-                                </span>
-                                <i class="glyphicon glyphicon glyphicon-globe left-space-m10 middle text-muted" title="Public access (no authentication required)" data-ng-if="subApi.operation.noAuthentication"></i>  
-                                <span class="pull-right fs14 top-space-m2 text-muted hidden-xs">
-                                    {{ subApi.description }}
-                                </span>
-                            </accordion-heading>
+                                <p class="italic">{{ subApi.operation.description}}</p>
 
+                                <!-- request form -->
+                                <form class="bottom-space-m10" data-ng-submit="requestApi(subApi)">
 
-                            <p class="italic">{{ subApi.operation.description}}</p>
+                                    <h5 class="fs16 top-space-m26" data-ng-if="subApi.operation.parameters.length">Parameter(s):</h5>
 
-                            <!-- request form -->
-                            <form class="bottom-space-m10" data-ng-submit="requestApi(subApi)">
+                                    <table class="table table-striped table-condensed" data-ng-if="subApi.operation.parameters.length">
+                                        <thead>
+                                            <tr>
+                                                <th>Parameter</th>
+                                                <th>Value</th>
+                                                <th>&nbsp;</th>
+                                                <th>Data Type</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr data-ng-repeat="param in subApi.operation.parameters">
+                                                <td>
+                                                    <label for="{{param.name}}" class="normal pointer">{{ param.name }}</label>
+                                                    <sup data-ng-if="param.required" class="text-danger">*</sup>
+                                                </td>
 
-                                <h5 class="fs16 top-space-m26" data-ng-if="subApi.operation.parameters.length">Parameter(s):</h5>
+                                                <!-- complex type -->
+                                                <td data-ng-if="param.isModel && !param.isEnum" colspan="2">
+                                                    <p class="text-muted">{{ param.description || '/' }}</p>
 
-                                <table class="table table-striped table-condensed" data-ng-if="subApi.operation.parameters.length">
-                                    <thead>
-                                        <tr>
-                                            <th>Parameter</th>
-                                            <th>Value</th>
-                                            <th>&nbsp;</th>
-                                            <th>Data Type</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr data-ng-repeat="param in subApi.operation.parameters">
-                                            <td>
-                                                <label for="{{param.name}}" class="normal pointer">{{ param.name }}</label>
-                                                <sup data-ng-if="param.required" class="text-danger">*</sup>
-                                            </td>
+                                                    <table class="table table-condensed">
+                                                        <tbody>
+                                                            <tr data-ng-repeat="modelParam in param.modelProperties">
 
-                                            <!-- complex type -->
-                                            <td data-ng-if="param.isModel && !param.isEnum" colspan="2">
-                                                <p class="text-muted">{{ param.description || '/' }}</p>
+                                                                <td>{{modelParam.name}}</td>
 
-                                                <table class="table table-condensed">
-                                                    <tbody>
-                                                        <tr data-ng-repeat="modelParam in param.modelProperties">
-
-                                                            <td>{{modelParam.name}}</td>
-
-                                                            <td>
+                                                                <td>
 
 
 
-                                                                <div data-ng-switch="modelParam.dataType">
+                                                                    <div data-ng-switch="modelParam.dataType">
 
-                                                                    <div data-ng-switch-when="boolean">
-                                                                        <input type="checkbox" name="{{modelParam.name}}" id="{{modelParam.name}}"
-                                                                            data-ng-model="modelParam.value" data-ng-required="modelParam.required" />
-                                                                    </div>
-
-                                                                    <div data-ng-switch-default>
-
-                                                                        <!-- default: string -->
-                                                                        <div data-ng-if="!modelParam.isModel">
-                                                                            <input type="text" name="{{modelParam.name}}" id="{{modelParam.name}}" class="form-control input-sm" 
+                                                                        <div data-ng-switch-when="boolean">
+                                                                            <input type="checkbox" name="{{modelParam.name}}" id="{{modelParam.name}}"
                                                                                 data-ng-model="modelParam.value" data-ng-required="modelParam.required" />
-                                                                        </div>    
+                                                                        </div>
 
-                                                                        <!-- else, can be an enum  -->
-                                                                        <div data-ng-if="modelParam.isModel && modelParam.isEnum">
+                                                                        <div data-ng-switch-default>
 
-                                                                            <select data-ng-model="modelParam.value" data-ng-options="value for value in modelParam.enum.enum" data-ng-required="modelParam.required" class="form-control input-sm">
-                                                                                <option></option>
-                                                                            </select> 
+                                                                            <!-- default: string -->
+                                                                            <div data-ng-if="!modelParam.isModel">
+                                                                                <input type="text" name="{{modelParam.name}}" id="{{modelParam.name}}" class="form-control input-sm" 
+                                                                                    data-ng-model="modelParam.value" data-ng-required="modelParam.required" />
+                                                                            </div>    
+
+                                                                            <!-- else, can be an enum  -->
+                                                                            <div data-ng-if="modelParam.isModel && modelParam.isEnum">
+
+                                                                                <select data-ng-model="modelParam.value" data-ng-options="value for value in modelParam.enum.enum" data-ng-required="modelParam.required" class="form-control input-sm">
+                                                                                    <option></option>
+                                                                                </select> 
+
+                                                                            </div>
 
                                                                         </div>
 
                                                                     </div>
 
-                                                                </div>
+
+
+                                                                </td>
+
+                                                                <td>{{modelParam.dataType}}</td>
 
 
 
-                                                            </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
 
-                                                            <td>{{modelParam.dataType}}</td>
-
-
-
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-
-                                                </div>
-                                            </td>
-                                            <td data-ng-if="!param.isModel || (param.isModel && param.isEnum)">
-
-                                                <div data-ng-switch="param.dataType">
-
-                                                    <div data-ng-switch-when="boolean">
-                                                        <input type="checkbox" name="{{param.name}}" id="{{param.name}}"
-                                                            data-ng-model="param.value" data-ng-required="param.required" />
                                                     </div>
+                                                </td>
+                                                <td data-ng-if="!param.isModel || (param.isModel && param.isEnum)">
 
-                                                    <div data-ng-switch-default>
+                                                    <div data-ng-switch="param.dataType">
 
-                                                        <!-- default: string -->
-                                                        <div data-ng-if="!param.isModel">
-                                                            <input type="text" name="{{param.name}}" id="{{param.name}}" class="form-control input-sm" 
+                                                        <div data-ng-switch-when="boolean">
+                                                            <input type="checkbox" name="{{param.name}}" id="{{param.name}}"
                                                                 data-ng-model="param.value" data-ng-required="param.required" />
-                                                        </div>    
+                                                        </div>
 
-                                                        <!-- else, can be an enum  -->
-                                                        <div data-ng-if="param.isModel && param.isEnum">
+                                                        <div data-ng-switch-default>
 
-                                                            <select data-ng-model="param.value" data-ng-options="value for value in param.enum.enum" data-ng-required="param.required" class="form-control input-sm">
-                                                                <option></option>
-                                                            </select> 
+                                                            <!-- default: string -->
+                                                            <div data-ng-if="!param.isModel">
+                                                                <input type="text" name="{{param.name}}" id="{{param.name}}" class="form-control input-sm" 
+                                                                    data-ng-model="param.value" data-ng-required="param.required" />
+                                                            </div>    
+
+                                                            <!-- else, can be an enum  -->
+                                                            <div data-ng-if="param.isModel && param.isEnum">
+
+                                                                <select data-ng-model="param.value" data-ng-options="value for value in param.enum.enum" data-ng-required="param.required" class="form-control input-sm">
+                                                                    <option></option>
+                                                                </select> 
+
+                                                            </div>
 
                                                         </div>
 
                                                     </div>
-
-                                                </div>
-                                            </td>
-                                            <td data-ng-if="!param.isModel || (param.isModel && param.isEnum)">
-                                                {{ param.description || '/' }}
-                                            </td>
-                                            <td>
-                                                {{ param.dataType }}
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                                </td>
+                                                <td data-ng-if="!param.isModel || (param.isModel && param.isEnum)">
+                                                    {{ param.description || '/' }}
+                                                </td>
+                                                <td>
+                                                    {{ param.dataType }}
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
 
 
 
 
-                                
-                                <button type="submit" class="btn btn-default" data-ng-disabled="subApi.loading">Execute</button>
-                            </form>
-
-
-                            <tabset>
-
-                                <!-- Response Class tab -->
-                                <tab heading="Response Class">
-                                    <pre data-ng-if="!subApi.operation.responseTypeIsModel">{{ subApi.operation.responseType}}</pre>
-                                    <div class="space-p10" data-ng-if="subApi.operation.responseTypeIsModel" data-jsonview="api.subApis.models[subApi.operation.responseType]"></div>
-                                </tab>
-
-                                <!-- Result tab -->
-                                <tab heading="Result" data-active="subApi.result.showResult" data-ng-if="subApi.result">
-                                    <div class="space-p10" data-ng-class="{'bg-danger': !subApi.result.success}" style="position: relative;">
-
-                                        <!-- in success -->
-                                        <div data-ng-if="subApi.result && subApi.result.success">
-                                            <div data-jsonview="subApi.result.data"></div>
-                                        </div>  
-
-                                        <!-- in error -->
-                                        <div data-ng-if="subApi.result && !subApi.result.success">
-                                            <strong class="text-danger">{{subApi.result.statusText}} ({{subApi.result.status}})</strong>
-                                            <div data-jsonview="subApi.result.data"></div>
-                                        </div>     
-
-                                        <span class="label label-default label-requestTime">{{subApi.result.requestTime || '?'}} ms</span>            
-                                    </div>               
                                     
-                                </tab>
+                                    <button type="submit" class="btn btn-default" data-ng-disabled="subApi.loading">Execute</button>
+                                </form>
 
-                                <!-- RAW tab -->
-                                <tab heading="RAW" data-ng-if="subApi.result">
-                                    <div class="raw-infos table-responsive">
-                                        <table class="table no-space">
-                                            <thead>
-                                                <tr>
-                                                    <th style="width: 50%;">Request</th>
-                                                    <th style="width: 50%;">Response</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <td>
-                                                        <strong>{{subApi.result.request.method}} {{subApi.result.request.url}}</strong>
-                                                        <ul class="list-unstyled">
-                                                            <li data-ng-repeat="(headerName, headerVal) in subApi.result.request.headers">
-                                                                <strong>{{headerName}}:</strong>
-                                                                <span>{{headerVal}}</span>
-                                                            </li>
-                                                        </ul>
-                                                    </td>
-                                                    <td>
-                                                        <strong data-ng-class="{'text-success': subApi.result.status < 300, 'text-danger': subApi.result.status >= 300}">{{subApi.result.status}} {{subApi.result.statusText}}</strong>
-                                                        <ul class="list-unstyled">
-                                                            <li data-ng-repeat="(headerName, headerVal) in subApi.result.headers">
-                                                                <strong>{{headerName}}:</strong>
-                                                                <span>{{headerVal}}</span>
-                                                            </li>
-                                                        </ul>
-                                                        <pre>{{subApi.result.data}}</pre>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </tab>
-                            </tabset>
+                                <!-- tabs -->
+                                <tabset>
 
+                                    <!-- Response Class tab -->
+                                    <tab heading="Response Class">
+                                        <pre data-ng-if="!subApi.operation.responseTypeIsModel">{{ subApi.operation.responseType}}</pre>
+                                        <div class="space-p10" data-ng-if="subApi.operation.responseTypeIsModel" data-jsonview="api.subApis.models[subApi.operation.responseType]"></div>
+                                    </tab>
 
-                        </accordion-group>
-                        
-                    </accordion>    
+                                    <!-- Result tab -->
+                                    <tab heading="Result" data-active="subApi.result.showResult" data-ng-if="subApi.result">
+                                        <div class="space-p10" data-ng-class="{'bg-danger': !subApi.result.success}" style="position: relative;">
+
+                                            <!-- in success -->
+                                            <div data-ng-if="subApi.result && subApi.result.success">
+                                                <div data-jsonview="subApi.result.data"></div>
+                                            </div>  
+
+                                            <!-- in error -->
+                                            <div data-ng-if="subApi.result && !subApi.result.success">
+                                                <strong class="text-danger">{{subApi.result.statusText}} ({{subApi.result.status}})</strong>
+                                                <div data-jsonview="subApi.result.data"></div>
+                                            </div>     
+
+                                            <span class="label label-default label-requestTime">{{subApi.result.requestTime || '?'}} ms</span>            
+                                        </div>               
+                                        
+                                    </tab>
+
+                                    <!-- RAW tab -->
+                                    <tab heading="RAW" data-ng-if="subApi.result">
+                                        <div class="raw-infos table-responsive">
+                                            <table class="table no-space">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 50%;">Request</th>
+                                                        <th style="width: 50%;">Response</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td>
+                                                            <strong>{{subApi.result.request.method}} {{subApi.result.request.url}}</strong>
+                                                            <ul class="list-unstyled">
+                                                                <li data-ng-repeat="(headerName, headerVal) in subApi.result.request.headers">
+                                                                    <strong>{{headerName}}:</strong>
+                                                                    <span>{{headerVal}}</span>
+                                                                </li>
+                                                            </ul>
+                                                        </td>
+                                                        <td>
+                                                            <strong data-ng-class="{'text-success': subApi.result.status < 300, 'text-danger': subApi.result.status >= 300}">{{subApi.result.status}} {{subApi.result.statusText}}</strong>
+                                                            <ul class="list-unstyled">
+                                                                <li data-ng-repeat="(headerName, headerVal) in subApi.result.headers">
+                                                                    <strong>{{headerName}}:</strong>
+                                                                    <span>{{headerVal}}</span>
+                                                                </li>
+                                                            </ul>
+                                                            <pre>{{subApi.result.data}}</pre>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </tab>
+                                </tabset>
+
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
             </li>
         </ul>
         
