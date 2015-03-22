@@ -1,0 +1,25 @@
+<p class="text-muted">{{ param.description || '/' }}</p>
+
+<table class="table table-condensed">
+    <tbody>
+        <tr data-ng-repeat="param in param.modelProperties">
+
+            <!-- param name -->
+            <td>{{param.name}}</td>
+
+            <!-- can be again a complex type -->
+            <td data-ng-if="param.isModel && !param.isEnum">
+                <div data-ng-include="'api/api.complexType.tpl.html'"></div>
+            </td>
+
+            <!-- classic or enum -->
+            <td data-ng-if="!param.isModel || (param.isModel && param.isEnum)">
+                <div data-ng-include="'api/api.simpleType.tpl.html'"></div>
+            </td>
+
+            <!-- type -->
+            <td>{{param.dataType}}</td>
+
+        </tr>
+    </tbody>
+</table>

@@ -1,8 +1,17 @@
 angular.module('consoleApp').service('Api', function ($q, Ovh) {
     'use strict';
 
+    // You can hide APIs: just add its path into this array:
+    // Example: var hiddenApis = ['/auth', '/dedicated/server/{serviceName}'];
+    var hiddenApis = [];
+
+    // ---
+
     this.getRootApis = function () {
         return Ovh.getSchema('/?null').then(function (response) {
+
+            response.apis = _.filter(response.apis, function (api) { return hiddenApis.indexOf(api.path) === -1; });
+
             _.forEach(response.apis, function (api) {
                 api.original = _.cloneDeep(api);
             });
@@ -27,11 +36,11 @@ angular.module('consoleApp').service('Api', function ($q, Ovh) {
                     param.enum = api.models[param.dataType];
                 } else {
 
-                    param.name = api.models[param.dataType].id;     // Because missing name 
+                    param.name = param.name || api.models[param.dataType].id;     // Because missing name
 
-                    param.modelProperties = [];   
+                    param.modelProperties = [];
 
-                    var modelProperties = _.pick(api.models[param.dataType].properties, function (val) { return val.readOnly === 0; });
+                    var modelProperties = _.pick(api.models[param.dataType].properties, function (val) { return !val.readOnly; });
 
                     _.forEach(modelProperties, function (modelPropertieVal, modelPropertieName) {
                         param.modelProperties.push({
@@ -60,6 +69,8 @@ angular.module('consoleApp').service('Api', function ($q, Ovh) {
             if (subApi.apis && subApi.apis.length) {
                 var subApiList = [];
 
+                subApi.apis = _.filter(subApi.apis, function (api) { return hiddenApis.indexOf(api.path) === -1; });
+
                 _.forEach(subApi.apis, function (api) {
                     _.forEach(api.operations, function (operation) {
 
@@ -68,7 +79,7 @@ angular.module('consoleApp').service('Api', function ($q, Ovh) {
 
                         // erk... need to find a better solution
                         operation.parameters = _.sortByOrder(operation.parameters, ['paramType'], [false]);
-                        
+
                         // check operation params
                         parseParameters(subApi, operation.parameters);
 
@@ -80,6 +91,7 @@ angular.module('consoleApp').service('Api', function ($q, Ovh) {
                         });
 
                     });
+
                 });
 
                 subApi.apis = _.sortBy(subApiList, 'path');
@@ -89,6 +101,19 @@ angular.module('consoleApp').service('Api', function ($q, Ovh) {
         });
     };
 
+
+    function getRequestParamValue (param) {
+        // complex type in complex type
+        if (param.isModel && !param.isEnum) {
+            var ret = {};
+            _.forEach(param.modelProperties, function (_param) {
+                ret[_param.name] = getRequestParamValue(_param);   // loop
+            });
+            return ret;
+        } else {
+            return param.value;
+        }
+    }
 
     this.requestApi = function (api) {
 
@@ -101,16 +126,17 @@ angular.module('consoleApp').service('Api', function ($q, Ovh) {
             _.forEach(( (param.isModel && !param.isEnum) ? param.modelProperties : [param]), function (_param) {
                 switch (_param.paramType) {
                 case 'path':
+                case 'query':
                     if (!config.params) {
                         config.params = {};
                     }
-                    config.params[_param.name] = _param.value;
+                    config.params[_param.name] = getRequestParamValue(_param);
                     break;
                 case 'body':
                     if (!config.data) {
                         config.data = {};
                     }
-                    config.data[_param.name] = _param.value;
+                    config.data[_param.name] = getRequestParamValue(_param);
                     break;
                 }
             });

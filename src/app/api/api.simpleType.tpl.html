@@ -1,0 +1,55 @@
+<div data-ng-switch="param.dataType">
+
+    <div data-ng-switch-when="boolean">
+        <div class="btn-group" data-ng-init="param.required ? param.value = false : param.value = undefined">
+            <label class="btn btn-default input-sm fs12" data-ng-model="param.value" btn-radio="true">true</label>
+            <label class="btn btn-default input-sm fs12" data-ng-model="param.value" btn-radio="false">false</label>
+            <label class="btn btn-default input-sm fs12" data-ng-if="!param.required" data-ng-model="param.value" btn-radio="undefined">undefined</label>
+        </div>
+    </div>
+
+    <div data-ng-switch-default>
+
+        <!-- default: string -->
+        <div data-ng-if="!param.isModel">
+
+            <!-- value required -->
+            <input type="text" name="{{param.name}}" id="{{param.name}}" class="form-control input-sm"
+                   data-ng-if="param.required"
+                   data-ng-model="param.value"
+                   required />
+
+            <!-- else, can be undefined, null, empty string -->
+            <div data-ng-if="!param.required" class="input-group" data-ng-init="param.inputMode = 'input';">
+                <input type="text" name="{{param.name}}" id="{{param.name}}" class="form-control input-sm"
+                       data-ng-disabled="param.inputMode !== 'input'" placeholder="{{ param.inputMode !== 'input' ? param.inputMode : '' }}"
+                       data-ng-model="param.value"
+                       data-ng-change="checkUndefined(param)" />
+                <div class="input-group-btn" data-ng-class="{'open': param.dropdownOpen}">
+                    <button type="button" class="btn btn-default dropdown-toggle input-sm fs12" data-ng-click="param.dropdownOpen = !param.dropdownOpen"><span class="glyphicon glyphicon glyphicon-cog"></span></button>
+                    <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                        <li><a href="" data-ng-click="param.inputMode = 'input'; param.value = undefined; param.dropdownOpen = false;">Input</a></li>
+                        <li><a href="" data-ng-click="param.inputMode = 'null';  param.value = null;      param.dropdownOpen = false;"><i>null</i></a></li>
+                        <li><a href="" data-ng-click="param.inputMode = 'empty'; param.value = '';        param.dropdownOpen = false;"><i>empty string</i></a></li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- else, can be an enum  -->
+        <div data-ng-if="param.isModel && param.isEnum">
+
+            <select data-ng-options="value for value in param.enum.enum"
+                    data-ng-model="param.value"
+                    data-ng-change="checkUndefined(param)"
+                    data-ng-required="param.required"
+                    class="form-control input-sm">
+                <option value=""></option>
+            </select>
+
+        </div>
+
+    </div>
+
+</div>

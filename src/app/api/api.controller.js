@@ -1,4 +1,4 @@
-angular.module('consoleApp').controller('ApiCtrl', function ($scope, Api) {
+angular.module('consoleApp').controller('ApiCtrl', function ($scope, $timeout, Api) {
     'use strict';
 
     function init () {
@@ -7,7 +7,7 @@ angular.module('consoleApp').controller('ApiCtrl', function ($scope, Api) {
         });
     }
 
-    $scope.toggleRootApi = function (api) {
+    $scope.toggleRootApi = function (api, $event) {
         api.visible = !api.visible;
         api.viewRAW = false;
 
@@ -25,13 +25,31 @@ angular.module('consoleApp').controller('ApiCtrl', function ($scope, Api) {
         }
     };
 
+    $scope.toggleSubApi = function (subApi, $event) {
+        subApi.isOpen = !subApi.isOpen;
+
+        // set focus to first input
+        if (subApi.isOpen) {
+            $timeout(function () {
+                $($event.target).closest('.panel-group').find('.panel-body input[type="text"]:first').focus();
+            }, 99);
+        }
+    };
+
+    $scope.collapseAll = function (api) {
+        _.forEach(api.subApis.apis, function (subApi) {
+            subApi.isOpen = false;
+        });
+    };
+
     $scope.toggleRootApiRAW = function (api) {
-        api.visible = true; 
+        api.visible = true;
         api.viewRAW = !api.viewRAW;
     };
 
     $scope.requestApi = function (api) {
-        api.result = {};    
+        api.result = {};
+        api.result.showResult = true;
         api.loading = true;
         Api.requestApi(api).then(function (response) {
             api.result.success = true;
@@ -49,6 +67,12 @@ angular.module('consoleApp').controller('ApiCtrl', function ($scope, Api) {
             api.result.requestTime = response.requestTime;
             api.loading = false;
         });
+    };
+
+    $scope.checkUndefined = function (param) {
+        if (!param.value) {
+            param.value = undefined;
+        }
     };
 
 
