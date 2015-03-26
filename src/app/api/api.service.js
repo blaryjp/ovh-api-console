@@ -142,6 +142,10 @@ angular.module('consoleApp').service('Api', function ($q, Ovh) {
             });
         });
 
+        if (api.operation.noAuthentication) {
+            config.noAuthentication = true;
+        }
+
         var startTime = new Date().getTime();
         return Ovh[api.operation.httpMethod.toLowerCase()](api.path, config).then(function (response) {
             response.requestTime = new Date().getTime() - startTime;

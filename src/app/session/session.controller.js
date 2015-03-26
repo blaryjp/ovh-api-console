@@ -1,4 +1,4 @@
-angular.module('consoleApp').controller('SessionCtrl', function ($scope, Ovh) {
+angular.module('consoleApp').controller('SessionCtrl', function ($rootScope, $scope, Ovh) {
     'use strict';
 
     function init () {
@@ -24,6 +24,7 @@ angular.module('consoleApp').controller('SessionCtrl', function ($scope, Ovh) {
             $scope.me = null;
             $scope.isLogged = false;
             $scope.loading = false;
+            $rootScope.$broadcast('session.logout');
         });
     };
 

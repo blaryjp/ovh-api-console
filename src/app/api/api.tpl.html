@@ -95,7 +95,7 @@
 
                                                 <!-- description -->
                                                 <td data-ng-if="!param.isModel || (param.isModel && param.isEnum)" class="text-muted">
-                                                    {{ param.description || '/' }}
+                                                    {{ param.description || '&nbsp;' }}
                                                 </td>
 
                                                 <!-- type -->
@@ -106,7 +106,7 @@
                                         </tbody>
                                     </table>
 
-                                    <button type="submit" class="btn btn-primary" data-ng-disabled="subApi.loading">Execute</button>
+                                    <button type="submit" class="btn btn-primary" data-ng-disabled="(!isLogged && !subApi.operation.noAuthentication) || subApi.loading">Execute</button>
                                     <button type="reset" class="btn btn-default" data-ng-disabled="subApi.loading">Reset</button>
                                     <span class="loading left-space-m20" data-ng-if="subApi.loading"></span>
                                 </form>

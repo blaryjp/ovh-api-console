@@ -1,11 +1,21 @@
-angular.module('consoleApp').controller('ApiCtrl', function ($scope, $timeout, Api) {
+angular.module('consoleApp').controller('ApiCtrl', function ($scope, $timeout, Ovh, Api) {
     'use strict';
 
+    $scope.isLogged = false;
+
     function init () {
+        $scope.isLogged = Ovh.isLogged();
+
         Api.getRootApis().then(function (apisList) {
             $scope.apiList = apisList;
         });
     }
+
+    $scope.$on('session.logout', function () {
+        $scope.isLogged = Ovh.isLogged();
+    });
+
+    // ---
 
     $scope.toggleRootApi = function (api, $event) {
         api.visible = !api.visible;
@@ -62,7 +72,7 @@ angular.module('consoleApp').controller('ApiCtrl', function ($scope, $timeout, A
             api.result.status = response.status;
             api.result.statusText = response.statusText;
             api.result.request = response.config;
-            api.result.headers = JSON.parse(JSON.stringify(response.headers()));
+            api.result.headers = response.headers ? JSON.parse(JSON.stringify(response.headers())) : {};
             api.result.showResult = true;
             api.result.requestTime = response.requestTime;
             api.loading = false;
