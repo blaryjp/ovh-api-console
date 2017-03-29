@@ -177,6 +177,10 @@
                                             </table>
                                         </div>
                                     </tab>
+
+                                    <tab heading="{{example.name}}" ng-repeat="(language, example) in subApi.examples">
+                                        <pre>{{example.code}}</pre>
+                                    </tab>
                                 </tabset>
 
                             </div>

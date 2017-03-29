@@ -1,4 +1,4 @@
-angular.module('consoleApp').service('Api', function ($q, Ovh) {
+angular.module('consoleApp').service('Api', function ($rootScope, $q, Ovh) {
     'use strict';
 
     // You can hide APIs: just add its path into this array:
@@ -60,6 +60,19 @@ angular.module('consoleApp').service('Api', function ($q, Ovh) {
 
     }
 
+    // Build code samples
+    function buildCodeExamples(subApi) {
+        // console.log("Building code examples for "+subApi.operation.httpMethod+" "+subApi.path);
+
+        // POC: build python code sample
+        var examples = {
+            'python': {name: "Python", code: "print 'Hello Python'"},
+            'php':    {name: "PHP",    code: "Hello PHP world!"},
+        };
+
+        subApi.examples = examples;
+    }
+
     this.getSubApis = function (path) {
         return Ovh.getSchema(path).then(function (subApi) {
 
@@ -83,13 +96,24 @@ angular.module('consoleApp').service('Api', function ($q, Ovh) {
                         // check operation params
                         parseParameters(subApi, operation.parameters);
 
-                        // Here it is
-                        subApiList.push({
+                        // build subApiRoute
+                        var subApiRoute = {
                             path        : api.path,
                             description : api.description,
-                            operation   : operation
-                        });
+                            operation   : operation,
+                            examples    : {},
+                        };
 
+                        // initial code sample build
+                        buildCodeExamples(subApiRoute);
+
+                        // watch for parameter changes and update the code
+                        $rootScope.$watch(function() {return operation;}, function(operation, oldOperation) {
+                            buildCodeExamples(subApiRoute);
+                        }, true);
+
+                        // Here it is
+                        subApiList.push(subApiRoute);
                     });
 
                 });
