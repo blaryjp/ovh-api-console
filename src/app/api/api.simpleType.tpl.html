@@ -14,14 +14,14 @@
         <div data-ng-if="!param.isModel">
 
             <!-- value required -->
-            <input type="text" name="{{param.name}}" id="{{param.name}}" class="form-control input-sm"
+            <input type="{{ param.dataType === 'long' ? 'number' : 'text' }}" name="{{param.name}}" id="{{param.name}}" class="form-control input-sm"
                    data-ng-if="param.required"
                    data-ng-model="param.value"
                    required />
 
             <!-- else, can be undefined, null, empty string -->
             <div data-ng-if="!param.required" class="input-group" data-ng-init="param.inputMode = 'input';">
-                <input type="text" name="{{param.name}}" id="{{param.name}}" class="form-control input-sm"
+                <input type="{{ param.dataType === 'long' ? 'number' : 'text' }}" name="{{param.name}}" id="{{param.name}}" class="form-control input-sm"
                        data-ng-disabled="param.inputMode !== 'input'" placeholder="{{ param.inputMode !== 'input' ? param.inputMode : '' }}"
                        data-ng-model="param.value"
                        data-ng-change="checkUndefined(param)" />
@@ -30,7 +30,8 @@
                     <ul class="dropdown-menu dropdown-menu-right" role="menu">
                         <li><a href="" data-ng-click="param.inputMode = 'input'; param.value = undefined; param.dropdownOpen = false;">Input</a></li>
                         <li><a href="" data-ng-click="param.inputMode = 'null';  param.value = null;      param.dropdownOpen = false;"><i>null</i></a></li>
-                        <li><a href="" data-ng-click="param.inputMode = 'empty'; param.value = '';        param.dropdownOpen = false;"><i>empty string</i></a></li>
+                        <li data-ng-if="param.dataType !== 'long'"><a href="" data-ng-click="param.inputMode = 'empty'; param.value = ''; param.dropdownOpen = false;"><i>empty string</i></a></li>
+                        <li data-ng-if="param.dataType === 'long'"><a href="" data-ng-click="param.inputMode = 'zero'; param.value = 0; param.dropdownOpen = false;"><i>Zero</i></a></li>
                     </ul>
                 </div>
             </div>
