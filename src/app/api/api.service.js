@@ -138,6 +138,60 @@ angular.module('consoleApp').service('Api', function ($rootScope, $q, Ovh) {
         });
     }
 
+    // Build Php arguments
+    function buildPhpArguments(lines, params, level) {
+        if (level === undefined) {
+            level = 0;
+        }
+
+        // Compute padding and separators
+        var separator = " => ";
+        var leftPadding = '    '.repeat(level + 1);
+        var maxParamNameLen = 0;
+
+        _.forEach(params, function(param, key) {
+            var len = key.length;
+            maxParamNameLen = len > maxParamNameLen ? len : maxParamNameLen;
+        });
+
+        // Render !
+        _.forEach(params, function(param, key) {
+            var l = "";
+
+            // Handle arrays
+            if (_.isArray(params)) {
+               l =  leftPadding;
+            } else {
+               l =  leftPadding + "'"+key+"'" + ' '.repeat(maxParamNameLen - key.length) + separator;
+            }
+
+            // Print value
+            if (typeof(param) === "boolean") {
+                l += param ? "TRUE":"FALSE";
+            } else if (typeof(param) === "number") {
+                l += param;
+            } else if (typeof(param) === "string") {
+                param = param.replace('\\', '\\\\'); // Escape the escape char
+                param = param.replace('"', '\\"');   // Escape double quotes
+                param = param.replace('\n', '\\n');  // Escape line feed
+                l += '"'+param+'"';
+            } else if (typeof(param) === "undefined" || param === null) {
+                l += "NULL";
+            } else if (typeof(param) === "object") {
+                l += 'array(';
+                lines.push(l);
+                buildPhpArguments(lines, param, level+1);
+                l = leftPadding + ')';
+            } else {
+                console.log("Unsupported type "+typeof(param)+" for", param);
+                l += '"UNSUPPORTED TYPE"';
+            }
+
+            l += ',';
+            lines.push(l);
+        });
+    }
+
     // Build code samples
     function buildCodeExamples(subApi) {
         var method = subApi.operation.httpMethod.toLowerCase();
@@ -188,10 +242,45 @@ angular.module('consoleApp').service('Api', function ($rootScope, $q, Ovh) {
         python.push("# Pretty print();");
         python.push("print(json.dumps(result, indent=4))");
 
+        // Build PHP
+        var php = [];
+        php.push("<?php");
+        php.push("/**");
+        php.push(" * First, download the latest release of PHP wrapper from");
+        php.push(" * https://github.com/ovh/php-ovh/releases and include this");
+        php.push(" * script into the folder with extracted files.");
+        php.push(" */");
+        php.push("require __DIR__ . '/vendor/autoload.php';");
+        php.push("use \\Ovh\\Api;");
+        php.push("");
+        php.push("/**");
+        php.push(" * Instanciate an OVH Client.");
+        php.push(" * You can generate new credentials with full access to your account on");
+        php.push(" * The token creation page: https://api.ovh.com/createToken/index.cgi?GET=/*&PUT=/*&POST=/*&DELETE=/*");
+        php.push(" */");
+        php.push("$client = new Api(");
+        php.push("    'xxxxxxxxxx', // Application Key");
+        php.push("    'xxxxxxxxxx', // Application Secret");
+        php.push("    'ovh-eu',     // Endpoint of API OVH Europe"); // TODO: use config to set the correct endpoint
+        php.push("    'xxxxxxxxxx', // Consumer Key");
+        php.push(");");
+        php.push("");
+        if (parameters.param || parameters.data) {
+            php.push("$result = $client->"+method+"('"+path+"', array(");
+            buildPhpArguments(php, parameters.param);
+            buildPhpArguments(php, parameters.data);
+            php.push("));");
+        } else {
+            php.push("$result = $client->"+method+"('"+path+"');");
+        }
+        php.push("");
+        php.push("// Pretty print();");
+        php.push("print_r( $result );");
+
         // POC: build python code sample
         var examples = {
             'python': {name: "Python", code: python.join('\n')},
-            'php':    {name: "PHP",    code: "echo 'Hello PHP';"},
+            'php':    {name: "PHP",    code: php.join('\n')},
         };
 
         subApi.examples = examples;
