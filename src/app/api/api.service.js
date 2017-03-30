@@ -79,11 +79,118 @@ angular.module('consoleApp').service('Api', function ($rootScope, $q, Ovh) {
 
     }
 
+    // Build Python arguments
+    function buildPythonArguments(lines, params, level) {
+        if (level === undefined) {
+            level = 0;
+        }
+
+        // Compute padding and separators
+        var separator = level ? ": " : " = ";
+        var leftPadding = '    '.repeat(level + 1);
+        var maxParamNameLen = 0;
+
+        _.forEach(params, function(param, key) {
+            var len = key.length;
+            maxParamNameLen = len > maxParamNameLen ? len : maxParamNameLen;
+        });
+
+        // Render !
+        _.forEach(params, function(param, key) {
+            var l = "";
+
+            // Handle arrays
+            if (_.isArray(params)) {
+               l =  leftPadding;
+            } else {
+               l =  leftPadding + (level? "u'"+key+"'" : key) + ' '.repeat(maxParamNameLen - key.length) + separator;
+            }
+
+            // Print value
+            if (typeof(param) === "boolean") {
+                l += param ? "True":"False";
+            } else if (typeof(param) === "number") {
+                l += param;
+            } else if (typeof(param) === "string") {
+                param = param.replace('\\', '\\\\'); // Escape the escape char
+                param = param.replace('"', '\\"');   // Escape double quotes
+                param = param.replace('\n', '\\n');  // Escape line feed
+                l += 'u"'+param+'"';
+            } else if (typeof(param) === "undefined" || param === null) {
+                l += "None";
+            } else if (_.isArray(param)) {
+                l += '[';
+                lines.push(l);
+                buildPythonArguments(lines, param, level+1);
+                l = leftPadding + ']';
+            } else if (_.isObject(param)) {
+                l += '{';
+                lines.push(l);
+                buildPythonArguments(lines, param, level+1);
+                l = leftPadding + '}';
+            } else {
+                console.log("Unsupported type "+typeof(param)+" for", param);
+                l += '"UNSUPPORTED TYPE"';
+            }
+
+            l += ',';
+            lines.push(l);
+        });
+    }
+
     // Build code samples
     function buildCodeExamples(subApi) {
+        var method = subApi.operation.httpMethod.toLowerCase();
+        var path = subApi.path;
+
+        // Build parameters, as sent to the API
+        var parameters = buildParameters(subApi.operation.parameters);
+
+        // Build Path
+        _.forEach(subApi.operation.parameters, function (param) {
+            if (param.paramType === 'path' && param.value) {
+                path = path.replace('{' + param.name + '}', encodeURIComponent(param.value));
+            }
+
+            // Prune URI param from the param list: already handled
+            delete parameters.params[param.name];
+        });
+
+        // Build Python
+        var python = [];
+        python.push("# coding: utf-8");
+        python.push("'''");
+        python.push("First, install the latest release of Python wrapper: $ pip install ovh");
+        python.push("'''");
+        python.push("");
+        python.push("import json");
+        python.push("import ovh");
+        python.push("");
+        python.push("# Instanciate an OVH Client.");
+        python.push("# You can generate new credentials with full access to your account on");
+        python.push("# The token creation page: https://api.ovh.com/createToken/index.cgi?GET=/*&PUT=/*&POST=/*&DELETE=/*");
+        python.push("client = ovh.Client(");
+        python.push("    endpoint           = 'ovh-eu',     # Endpoint of API OVH Europe"); // TODO: use config to set the correct endpoint
+        python.push("    application_key    = 'xxxxxxxxxx', # Application Key");
+        python.push("    application_secret = 'xxxxxxxxxx', # Application Secret");
+        python.push("    consumer_key       = 'xxxxxxxxxx', # Consumer Key");
+        python.push(")");
+        python.push("");
+        if (parameters.param || parameters.data) {
+            python.push("result = client."+method+"('"+path+"',");
+            buildPythonArguments(python, parameters.param);
+            buildPythonArguments(python, parameters.data);
+            python.push(")");
+        } else {
+            python.push("result = client."+method+"('"+path+"')");
+        }
+        python.push("");
+        python.push("# Pretty print();");
+        python.push("print(json.dumps(result, indent=4))");
+
         // POC: build python code sample
         var examples = {
-            'python': {name: "Python", code: "print 'Hello Python !'"},
+            'python': {name: "Python", code: python.join('\n')},
             'php':    {name: "PHP",    code: "echo 'Hello PHP';"},
         };
 
