@@ -19,9 +19,14 @@ angular.module('consoleApp').service('Api', function ($rootScope, $q, Ovh) {
         });
     };
 
-    function parseParameters (api, parameters) {
+    function parseParameters (method, api, parameters, level) {
+        var bodyParamCount = 0;
+        var lastBodyParamId = 0;
+        if (level === undefined) {
+            level = 0;
+        }
 
-        _.forEach(parameters, function (param) {
+        _.forEach(parameters, function (param, id) {
 
             // parameter is a model?
             param.isModel = !!api.models[param.dataType];
@@ -48,15 +53,29 @@ angular.module('consoleApp').service('Api', function ($rootScope, $q, Ovh) {
                             description : modelPropertieVal.description,
                             name        : modelPropertieName,
                             paramType   : param.paramType,
-                            required    : modelPropertieVal.canBeNull ? 0 : 1
+                            required    : modelPropertieVal.canBeNull || method === 'PUT' ? 0 : 1,
                         });
                     });
 
                     // loop!
-                    parseParameters(api, param.modelProperties);
+                    parseParameters(method, api, param.modelProperties, level + 1);
                 }
             }
+
+            // Increment body counter, to decide wether to move this API UP
+            if (param.paramType === 'body') {
+                bodyParamCount++;
+                lastBodyParamId = id;
+            }
         });
+
+        // If there is a single param AND this is a PUT --> move all params 1 level up
+        if (method === "PUT" && level === 0 && bodyParamCount === 1) {
+            _.forEach(parameters[lastBodyParamId].modelProperties, function (param) {
+                parameters.push(param);
+            });
+            parameters.splice(lastBodyParamId, 1);
+        }
 
     }
 
@@ -92,7 +111,7 @@ angular.module('consoleApp').service('Api', function ($rootScope, $q, Ovh) {
                         operation.parameters = _.sortByOrder(operation.parameters, ['paramType'], [false]);
 
                         // check operation params
-                        parseParameters(subApi, operation.parameters);
+                        parseParameters(operation.httpMethod, subApi, operation.parameters);
 
                         // build subApiRoute
                         var subApiRoute = {
@@ -123,13 +142,17 @@ angular.module('consoleApp').service('Api', function ($rootScope, $q, Ovh) {
         });
     };
 
-
     function getRequestParamValue (param) {
         // complex type in complex type
         if (param.isModel && !param.isEnum) {
             var ret = {};
             _.forEach(param.modelProperties, function (_param) {
-                ret[_param.name] = getRequestParamValue(_param);   // loop
+                var paramValue = getRequestParamValue(_param);
+
+                // If the value evaluates to false, prune it, unless it is mandatory or explicitely marked as null by the user
+                if (paramValue || _param.required || _param.inputMode !== 'input') {
+                    ret[_param.name] = paramValue;
+                }
             });
             return ret;
         } else {
@@ -137,32 +160,38 @@ angular.module('consoleApp').service('Api', function ($rootScope, $q, Ovh) {
         }
     }
 
-    this.requestApi = function (api) {
-
+    function buildParameters(parameters) {
         var config = {};
 
         // parse params
-        _.forEach(api.operation.parameters, function (param) {
+        _.forEach(parameters, function (param) {
+            var paramCategory = "";
+            var paramValue = getRequestParamValue(param);
 
-            // if complex type, go into its properties, else simply takes param
-            _.forEach(( (param.isModel && !param.isEnum) ? param.modelProperties : [param]), function (_param) {
-                switch (_param.paramType) {
+            switch (param.paramType) {
                 case 'path':
                 case 'query':
-                    if (!config.params) {
-                        config.params = {};
-                    }
-                    config.params[_param.name] = getRequestParamValue(_param);
+                    paramCategory = "params";
                     break;
                 case 'body':
-                    if (!config.data) {
-                        config.data = {};
-                    }
-                    config.data[_param.name] = getRequestParamValue(_param);
+                    paramCategory = "data";
                     break;
+            }
+
+            // If the value evaluates to false, prune it, unless it is mandatory or explicitely marked as null by the user
+            if (paramValue || param.required || param.inputMode !== 'input') {
+                if (!config[paramCategory]) {
+                    config[paramCategory] = {};
                 }
-            });
+                config[paramCategory][param.name] = paramValue;
+            }
         });
+
+        return config;
+    }
+
+    this.requestApi = function (api) {
+        var config = buildParameters(api.operation.parameters);
 
         if (api.operation.noAuthentication) {
             config.noAuthentication = true;
