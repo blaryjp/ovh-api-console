@@ -14,7 +14,7 @@
  */
 angular.module( 'consoleApp' )
 
-.config(function config( $stateProvider ) {
+.config(function config( $stateProvider, hljsServiceProvider ) {
   $stateProvider.state( 'main', {
     url: '/',
     views: {
@@ -24,6 +24,11 @@ angular.module( 'consoleApp' )
       }
     },
     data:{ pageTitle: 'Home' }
+  });
+
+  hljsServiceProvider.setOptions({
+      // replace tab with 4 spaces
+      tabReplace: '    '
   });
 });
 

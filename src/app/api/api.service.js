@@ -62,12 +62,10 @@ angular.module('consoleApp').service('Api', function ($rootScope, $q, Ovh) {
 
     // Build code samples
     function buildCodeExamples(subApi) {
-        // console.log("Building code examples for "+subApi.operation.httpMethod+" "+subApi.path);
-
         // POC: build python code sample
         var examples = {
-            'python': {name: "Python", code: "print 'Hello Python'"},
-            'php':    {name: "PHP",    code: "Hello PHP world!"},
+            'python': {name: "Python", code: "print 'Hello Python !'"},
+            'php':    {name: "PHP",    code: "echo 'Hello PHP';"},
         };
 
         subApi.examples = examples;

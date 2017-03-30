@@ -179,7 +179,7 @@
                                     </tab>
 
                                     <tab heading="{{example.name}}" ng-repeat="(language, example) in subApi.examples">
-                                        <pre>{{example.code}}</pre>
+                                        <div hljs hljs-language="{{language}}" source="example.code"></div>
                                     </tab>
                                 </tabset>
 

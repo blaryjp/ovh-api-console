@@ -4,6 +4,7 @@ angular.module( 'consoleApp', [
   'ui.router',
   'templates-app',
   'templates-common',
+  'hljs',
   'ngOvh'
 ])
 
