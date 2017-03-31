@@ -346,7 +346,7 @@ angular.module('consoleApp').service('Api', function ($rootScope, $q, Ovh) {
                 var paramValue = getRequestParamValue(_param);
 
                 // If the value evaluates to false, prune it, unless it is mandatory or explicitely marked as null by the user
-                if (paramValue || _param.required || _param.inputMode !== 'input') {
+                if (paramValue || paramValue === false || param.required || (param.inputMode !== 'input' && param.inputMode !== undefined)) {
                     ret[_param.name] = paramValue;
                 }
             });
@@ -375,7 +375,7 @@ angular.module('consoleApp').service('Api', function ($rootScope, $q, Ovh) {
             }
 
             // If the value evaluates to false, prune it, unless it is mandatory or explicitely marked as null by the user
-            if (paramValue || param.required || param.inputMode !== 'input') {
+            if (paramValue || paramValue === false || param.required || (param.inputMode !== 'input' && param.inputMode !== undefined)) {
                 if (!config[paramCategory]) {
                     config[paramCategory] = {};
                 }
