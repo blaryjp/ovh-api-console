@@ -204,10 +204,8 @@ angular.module('consoleApp').service('Api', function ($rootScope, $q, Ovh) {
         _.forEach(subApi.operation.parameters, function (param) {
             if (param.paramType === 'path' && param.value) {
                 path = path.replace('{' + param.name + '}', encodeURIComponent(param.value));
+                delete parameters.params[param.name];
             }
-
-            // Prune URI param from the param list: already handled
-            delete parameters.params[param.name];
         });
 
         // Build Python
