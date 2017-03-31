@@ -68,6 +68,7 @@ module.exports = {
       'vendor/angular-sanitize/angular-sanitize.js',
       'vendor/angular-bootstrap/ui-bootstrap-tpls.min.js',
       'vendor/angular-ui-router/release/angular-ui-router.js',
+      'vendor/angular-highlightjs/angular-highlightjs.js',
       'vendor/URIjs/src/URI.js',
       'vendor/ng-ovh/ng-ovh.js',
       'vendor/scrollup/dist/jquery.scrollUp.min.js',
